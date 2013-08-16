@@ -23,6 +23,9 @@ object FlowershopBuild extends Build {
       resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
       libraryDependencies ++= Seq(
         "org.json4s"   %% "json4s-native" % "3.2.4",
+        "org.json4s"   %% "json4s-jackson" % "3.2.4",
+        "org.scalatra" %% "scalatra-json" % "2.2.1",
+        "org.codehaus.jackson" % "jackson-mapper-asl" % "1.9.12",
         "org.scalatra" %% "scalatra-swagger"  % ScalatraVersion,
         "org.scalatra" %% "scalatra" % ScalatraVersion,
         "org.scalatra" %% "scalatra-scalate" % ScalatraVersion,

@@ -1,4 +1,5 @@
 import java.io.File
+import org.codehaus.jackson.map.ObjectMapper
 import scala.concurrent.duration._
 import scala.Some
 
@@ -8,12 +9,14 @@ import org.scalatra.scalate.ScalateSupport
 import org.scalatra.swagger._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
+import scala.util.parsing.json.JSONObject
 import scalax.io._
 
 class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
   with SwaggerSupport
   with ScalateSupport
-  with NativeJsonSupport {
+  with NativeJsonSupport
+  with MethodOverride{
 
   protected implicit val jsonFormats: Formats = DefaultFormats
   override protected val applicationName = Some("file process")
@@ -104,235 +107,295 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
     get("/plik/removeName"){
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
+        <head>
+          <link type="text/css" href="\mystyle.css" rel="stylesheet"></link>
+        </head>
         <body>
           <h1>Remove from file</h1>
-          <form name="input" action="/plik/remove" method="delete" />
-          Username: <input type="text" name="user" />
-          <input type="submit" value="Submit" />
+          <form name="input" action="/plik/remove/" method="delete" >
+            <div id ="formWrapper">
+
+              <label for="user"> Username: </label>
+              <input type="text" placeholder ="Username" name="user" />
+              <br/>
+
+              <input type="submit" value="Remove" />
+            </div>
+          </form>
         </body>
       </html>
     }
     get("/plik/findBy"){
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
+        <head>
+          <link type="text/css" href="\mystyle.css" rel="stylesheet" ></link>
+        </head>
         <body>
           <h1>Find by </h1>
-          <form name="input" action="/plik/find" method="get" />
-          Name: <input type="text" name="name" /> <br/>
-          Age: <input type="text" name="age" /> <br/>
-          Sex: <input type="text" name="sex" /> <br/>
-          Address: <input type="text" name="address" /> <br/>
-          <input type="submit" value="Find" />
-          <br/>
+          <form name="input" action="/plik/find" method="get">
+            <div id ="formWrapper">
+
+              <label for="name">Name:</label>
+              <input type="text" placeholder="Name" name="name" />
+              <br/>
+
+              <label for="age">Age:</label>
+              <input type="text" placeholder="age" name="age" />
+              <br/>
+
+              <label for="sex">Sex:</label>
+              <input type="text" placeholder="sex" name="sex" />
+              <br/>
+
+              <label for="address">Address:</label>
+              <input type="text" placeholder="address" name="address" />
+              <br/>
+
+              <input type="submit" value="Find" />
+              <br/>
+            </div>
+          </form>
         </body>
       </html>
     }
     get("/plik/edit"){
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
+        <head>
+          <link type ="text/css" href="\mystyle2.css" rel="stylesheet"></link>
+        </head>
         <body>
           <h1>Find record you want to edit </h1>
-          <form name="input" action="/plik/edite" method="post" />
-          Name: <input type="text" name="name" />
-          New Name: <input type="text" name="newName" /> <br/>
-          Age: <input type="text" name="age" />
-          New Age: <input type="text" name="newAge" /><br/>
-          Sex: <input type="text" name="sex" />
-          New Sex: <input type="text" name="newSex" /><br/>
-          Address: <input type="text" name="address" />
-          New Address: <input type="text" name="newAddress" /><br/>
-          <input type="submit" value="Find" />
-          <br/>
+          <form name="input" action="/plik/edite" method="post">
+            <div id="formWrapper">
+
+              <label for="name">Name:</label>
+              <input type="text" placeholder="name" name="name" />
+
+              <label for="newName" > New Name:</label>
+              <input type="text" placeholder="new Name" name="newName" />
+              <br/>
+
+              <label for="age" > Age:</label>
+              <input type="text" placeholder="age" name="age" />
+
+              <label for="newAge"  > New Age  :</label>
+              <input type="text" placeholder="new age" name="newAge" />
+              <br/>
+
+              <label for="sex">Sex:</label>
+              <input type="text" placeholder="sex" name="sex" />
+
+              <label for="newSex">New sex:</label>
+              <input type="text" placeholder="new sex" name="newSex" />
+              <br/>
+
+              <label for="address">Address:</label>
+              <input type="text" placeholder="address" name="address" />
+
+              <label for="newAddress">New Address:</label>
+              <input type="text" placeholder="new Address" name="newAddress" />
+              <br/>
+
+              <input type="submit" value="Edit" />
+              <br/>
+            </div>
+          </form>
         </body>
       </html>
     }
-  /*  get("/plik/find"){
-          var name = multiParams.get("name").toString
-          var age = multiParams.get("age").toString
-          var sex = multiParams.get("sex").toString
-          var address = multiParams.get("address").toString
+  post("/plik/append"){
+    var name =params.get("firstname").get
+    var age =params.get("age").get
+    var sex = params.get("sex").get
+    var address = params.get("address").get
 
-                  var temp = 0
-                  if (age.isEmpty ){
-                    temp = -1
-                  }
-                  else  { temp = age.toInt }
-                  var person = Person(name,temp,sex,address)
-                  var result = ""
-                  try{
-                    var source = scala.io.Source.fromFile("file.txt")
-                    for ( line <- source.getLines()){
-                      var currentLineResult = findMatch( line, person)
-                      result = result + currentLineResult
-                      currentLineResult =""
-                    }
+    println(name + age + sex + address + " parametry")
 
-                    source.close()
-                  }
-          println(result)
+    val gender = sex.toLowerCase
+    if( !(gender.equals("male") | gender.equals("female")) | name.isEmpty | age.isEmpty | address.isEmpty )
+      NotFound("Bad parameters used.")
+    else{
+      var personAge = 0
+      try {
+        personAge =age.toInt
+      } catch {
+        case ex: NumberFormatException =>{
+          personAge = -1
+        }
+      }
+      if(personAge < 0 )
+        NotAcceptable("Age must be a number equal or higher than 0")
+      else{
+        val person: Person = Person(name.toLowerCase , personAge, gender, address)
+        if (findIfNameIsUnique(Person(name,-1,"",""))){
+          val file: Seekable =  Resource.fromFile("file.txt")
+          file.append("\n" + toJson(person))
+          val source = scala.io.Source.fromFile("file.txt")
+          val lines = source.mkString
+          source.close()
+          lines.toString
+        } else
+          NotAcceptable("Name must be unique")
+      }
     }
+  }
+  get("/plik/find"){
+    var name = params.get("name").get
+    var age = params.get("age").get
+    var sex = params.get("sex").get
+    var address = params.get("address").get
 
-    get("/remove"){
-            var user = params.get("user")
-                  val nameToRemove = user
-                  val file: Seekable =  Resource.fromFile(new File("file.txt"))
-                  var position = 0
-                  try{
-                    for ( line <- file.lines()){
-                      if (parse(line).convertTo[Person].name.equals(nameToRemove)){
-                        file.patch(position, "", OverwriteSome(line.length))
-                        println(line)
-                      }  else {
-                        position = position + line.length
-                      }
-                    }
-                  }
-                  val source = scala.io.Source.fromFile("file.txt")
-                  val lines = source.mkString
-                  source.close()
-                <p>{lines.toString}</p>
-                }
+    var temp = 0
+    if (age.isEmpty ){
+      temp = -1
+    }
+    else  { temp = age.toInt }
+    var person = Person(name,temp,sex,address)
+    var result = ""
+    try{
+      var source = scala.io.Source.fromFile("file.txt")
+      for ( line <- source.getLines()){
+        var currentLineResult = findMatch( line, person)
+        result = result + currentLineResult
+        currentLineResult =""
+      }
 
+      source.close()
+    }
+    result
+  }
+  get("/plik/remove"){
+    val nameToRemove = params.get("user").get
+    val file: Seekable =  Resource.fromFile(new File("file.txt"))
+    var position = 0
+    try{
+      for ( line <- file.lines()){
+        if (parse(line , true).extract[Person].name.equals(nameToRemove)){
+          file.patch(position, "", OverwriteSome(line.length))
+          println(line)
+        }  else {
+          position = position + line.length
+        }
+      }
+    }
+    val source = scala.io.Source.fromFile("file.txt")
+    val lines = source.mkString
+    source.close()
+    lines.toString
+  }
+  post("/plik/edite"){
 
+    var name = params.get("name").get
+    var newName = params.get("newName").get
+    var age = params.get("age").get
+    var newAge = params.get("newAge").get
+    var sex = params.get("sex").get
+    var newSex = params.get("newSex").get
+    var address = params.get("address").get
+    var newAddress = params.get("newAddress").get
 
-      post("/plik/append"){
-        var name = multiParams.get("firstname")
-        var age = multiParams.get("age")
-        var sex = multiParams.get("sex")
-        var address = multiParams.get("address")
-
-        val gender = sex.toLowerCase
-        if( !(gender.equals("male") | gender.equals("female")) | firstname.isEmpty | age.isEmpty | address.isEmpty )
-              complete(BadRequest, "Bad parameters used.")
-        else{
-             var personAge = 0
-             try {
-               personAge =age.toInt
-             } catch {
-               case ex: NumberFormatException =>{
-                 personAge = -1
-               }
-             }
-             if(personAge < 0 )
-               <p>Bad Request</p>
-             else{
-               val person  = Person(firstname , personAge, gender, address)
-               val PersonFormat = jsonFormat(Person, "name", "age", "sex", "address")
-               val file: Seekable =  Resource.fromFile("file.txt")
-               file.append("\n" + PersonFormat.write(person))
-               val source = scala.io.Source.fromFile("file.txt")
-               val lines = source.mkString
-               source.close()
-               <p>{lines.toString}</p>
-             }
-           }
-         }
-
-       post("/plik/edite"){
-
-        var name = multiParams.get("name")
-        var newName = multiParams.get("newName")
-        var age = multiParams.get("age")
-        var newAge = multiParams.get("newAge")
-        var sex = multiParams.get("sex")
-        var newSex = multiParams.get("newSex")
-        var address = multiParams.get("address")
-        var newAddress = multiParams.get("newAdress")
-
-        var temp = 0
-        var personAge = 0
-        if (age.isEmpty ){
-           temp = -1
+    var temp = 0
+    var personAge = 0
+    if (age.isEmpty ){
+      temp = -1
+    }
+    else  {
+      try {
+        personAge =age.toInt
+      } catch {
+        case ex: NumberFormatException =>{
+          personAge = -1
+        }
+      }
+    }
+    val gender = sex.toLowerCase
+    val newGender = newSex.toLowerCase
+    if(personAge < 0 | !(gender.equals("male") | gender.equals("female") | gender.isEmpty) | !(newGender.equals("male") | newGender.equals("female") | newGender.isEmpty))
+      if (personAge < 0)
+        NotAcceptable("Age must be a number higher or equal 0")
+      else
+        NotAcceptable("Wrong sex parameter use \"male\" or \"female\"")
+    else if (findIfNameIsUnique(Person(newName,-1, "", ""))){
+      if (temp == 0){
+        temp = age.toInt
+      }
+      var temporary = 0
+      val file: Seekable =  Resource.fromFile("file.txt")
+      var position = 0
+      val personToEdit = Person(name, temp, sex, address)
+      try{
+        val fileLenght = file.lines().mkString.length
+        var offset = 0
+        for( line <- file.lines()){
+          var currentLineResult = ""
+          println(line)
+          if ( position + line.length <= fileLenght){
+            currentLineResult = findMatch( line, personToEdit)}
+          else{
+            val linesubstring = line.substring(0, (line.length - offset))
+            if ( linesubstring.isEmpty == false)
+              currentLineResult = findMatch ( line.substring(0, (line.length-offset)), personToEdit )}
+          if ( currentLineResult.isEmpty){
+            position = position + line.length + 2
           }
-        else  {
-           try {
-                personAge =age.toInt
-               } catch {
-                   case ex: NumberFormatException =>{
-                      personAge = -1
-                  }
-                 }
-               }
-        val gender = sex.toLowerCase
-        val newGender = newSex.toLowerCase
-        if(personAge < 0 | !(gender.equals("male") | gender.equals("female") | gender.isEmpty) | !(newGender.equals("male") | newGender.equals("female") | newGender.isEmpty))
-             if (personAge < 0)
-               <p>"Age must be a number higher or equal 0"</p>
-             else
-               <p>"Wrong sex parameter use \"male\" or \"female\""</p>
-             else{
-                  if (temp == 0){
-                    temp = age.toInt
-                 }
-        var temporary = 0
-        val file: Seekable =  Resource.fromFile("file.txt")
-        var position = 0
-        val personToEdit = Person(name, temp, sex, address)
-        try{
-            val fileLenght = file.lines().mkString.length
-            var offset = 0
-            for( line <- file.lines()){
-               var currentLineResult = ""
-               println(line)
-               if ( position + line.length <= fileLenght){
-                   currentLineResult = findMatch( line, personToEdit)}
-               else{
-                    val linesubstring = line.substring(0, (line.length - offset))
-                    if ( linesubstring.isEmpty == false)
-                         currentLineResult = findMatch ( line.substring(0, (line.length-offset)), personToEdit )}
-                    if ( currentLineResult.isEmpty){
-                        position = position + line.length + 1
-                      }
-                      else {
+          else {
 
-                        if (newAge.isEmpty ){
-                          temporary = -1
-                        }
-                        else  {
-                          try {
-                            personAge =newAge.toInt
-                          } catch {
-                            case ex: NumberFormatException =>{
-                              personAge = -1
-                            }
-                          }
-                        }
-                        if (personAge < 0 ){
-                          <p>"new Age parameter must be a number higher or equal 0") </p>
-                        } else {
-                          if (temporary == 0){
-                            temporary = newAge.toInt
-                          }
-                          val newLine =  editPerson(line , Person(newName, temporary, newSex, newAddress))
-                          file.patch(position , newLine , OverwriteSome(line.length))
-                          file.string
-                          if ( newLine.length > line.length)
-                            offset = offset + (newLine.length - line.length)
-                          position = position + newLine.length + 1
-                        }
-                      }
-                    }
-                    val source = scala.io.Source.fromFile("file.txt")
-                    val lines = source.mkString
-                    source.close()
-                    <p>{lines.toString}</p>
-                  }
+            if (newAge.isEmpty ){
+              temporary = -1
+            }
+            else  {
+              try {
+                personAge =newAge.toInt
+              } catch {
+                case ex: NumberFormatException =>{
+                  personAge = -1
                 }
-     }
-*/
-
-
-
-/*
-
+              }
+            }
+            if (personAge < 0 ){
+              NotAcceptable("new Age parameter must be a number higher or equal 0")
+            } else {
+              if (temporary == 0){
+                temporary = newAge.toInt
+              }
+              val newLine =  editPerson(line , Person(newName, temporary, newSex, newAddress))
+              if ( newLine.length > line.length)
+                offset = offset + (newLine.length - line.length)
+              file.patch(position  , newLine , OverwriteSome(line.length))
+              file.string
+              position = position + newLine.length + 2
+            }
+          }
+        }
+        val source = scala.io.Source.fromFile("file.txt")
+        val lines = source.mkString
+        source.close()
+        lines.toString
+      }
+    }  else{
+      NotAcceptable("New name must be unique")
+    }
+  }
+  get("/mystyle.css"){
+    val source = scala.io.Source.fromFile("mystyle.css")
+    val lines = source.mkString
+    source.close
+    lines
+  }
+  get("/mystyle2.css"){
+    val source = scala.io.Source.fromFile("mystyle2.css")
+    val lines = source.mkString
+    source.close
+    lines
+  }
 
 
   def findMatch(line : String ,  personToFind : Person ) : String = {
-//    import MyJsonProtocol._
-    var currentLine =  parse(line).convertTo[Person]
-    var currentLineResult =  line + "\n"
 
-    //var string =""
+    var currentLine =  parse(line , true).extract[Person]
+    var currentLineResult =  line + "\n"
     if (personToFind.name == "" ){
     }
     else if (currentLine.name != personToFind.name)
@@ -354,8 +417,12 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
 
   }
 
+  def toJson(person :Person) : String = {
+    "{\"name\":\"%s\",\"age\":%s,\"sex\":\"%s\",\"address\":\"%s\"}".format(person.name , person.age, person.sex, person.address)
+  }
+
   def editPerson(line : String ,  personToEdit : Person ) : String = {
-    var currentLine =  parse(line).convertTo[Person]
+    var currentLine =  parse(line , true).extract[Person]
     println(personToEdit)
     var name = personToEdit.name
     var age = personToEdit.age
@@ -376,8 +443,16 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
     if (personToEdit.address.isEmpty  ){
        address = currentLine.address
     }
-    PersonFormat.write(Person(name, age, sex, address)).toString()
+    toJson(Person(name, age, sex, address))
   }
-*/
 
+  def findIfNameIsUnique (personToFind: Person) : Boolean = {
+    var isUnique = true
+    val source = scala.io.Source.fromFile("file.txt")
+    for( line <- source.getLines()){
+      if ( !(findMatch(line, personToFind).isEmpty))
+        isUnique = false
+    }
+    isUnique
+  }
 }

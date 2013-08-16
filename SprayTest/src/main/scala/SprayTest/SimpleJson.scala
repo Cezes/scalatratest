@@ -2,12 +2,18 @@
 
 //mport DefaultJsonProtocol._
 
+import org.json4s.{Formats, DefaultFormats}
+import org.scalatra.json.JacksonJsonSupport
+import org.scalatra.ScalatraServlet
 import scalax.io.WriterResource
+import org.json4s.JsonDSL._
 
 import java.io.File
 
 
 /*case class Address(no: String, street: String, city: String)*/
+
+
 
 
 
@@ -21,6 +27,13 @@ object ApiResponseType{
   val INFO = "info"
   val OK ="ok"
   val TOO_BUSY = "too busy"
+}
+
+object Person extends ScalatraServlet with JacksonJsonSupport {
+  protected implicit val jsonFormats: Formats = DefaultFormats
+
+
+
 }
 
 /*
