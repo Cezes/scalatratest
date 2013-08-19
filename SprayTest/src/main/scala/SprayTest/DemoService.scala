@@ -276,11 +276,17 @@ with MethodOverride{
       else{
         val person: Person = Person(name.toLowerCase , personAge, gender, address)
         if (findIfNameIsUnique(Person(name,-1,"",""))){
-          val file: Seekable =  Resource.fromFile("file.txt")
-          file.append("\n" + toJson(person))
-          val source = scala.io.Source.fromFile("file.txt")
-          val lines = source.mkString
+          var source = scala.io.Source.fromFile("file.txt")
+          var lines = source.mkString
           source.close()
+          val file: Seekable =  Resource.fromFile("file.txt")
+          if (lines != "")
+            file.append("\n" + toJson(person))
+          else
+            file.append(toJson(person))
+          source = scala.io.Source.fromFile("file.txt")
+          lines = source.mkString
+          source.close
           lines.toString
         } else
           NotAcceptable("Name must be unique")
@@ -373,7 +379,6 @@ with MethodOverride{
     var address = params.get("address").get
     var newAddress = params.get("newAddress").get
 
-    println(newName == "")
     var temp = 0
     var personAge = 0
     if (age.isEmpty ){
@@ -402,7 +407,7 @@ with MethodOverride{
       var temporary = 0
       val file: Seekable =  Resource.fromFile("file.txt")
       var position = 0
-      val personToEdit = Person(name, temp, sex, address)
+      val personToEdit = Person(name, temp, gender, address)
       try{
         val fileLenght = file.lines().mkString.length
         var offset = 0
@@ -416,7 +421,7 @@ with MethodOverride{
             if ( linesubstring.isEmpty == false)
               currentLineResult = findMatch ( line.substring(0, (line.length-offset)), personToEdit )}
           if ( currentLineResult.isEmpty){
-            position = position + line.length + 2
+            position = position + line.length + 1
           }
           else {
 
@@ -438,12 +443,13 @@ with MethodOverride{
               if (temporary == 0){
                 temporary = newAge.toInt
               }
-              val newLine =  editPerson(line , Person(newName, temporary, newSex, newAddress))
+              val newLine =  editPerson(line , Person(newName, temporary, newGender, newAddress))
               if ( newLine.length > line.length)
                 offset = offset + (newLine.length - line.length)
               file.patch(position  , newLine , OverwriteSome(line.length))
               file.string
-              position = position + newLine.length + 2
+              println("offset:" + offset)
+              position = position + newLine.length + 1
             }
           }
         }
