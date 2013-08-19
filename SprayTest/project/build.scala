@@ -35,7 +35,7 @@ object FlowershopBuild extends Build {
         "org.eclipse.jetty.orbit" % "javax.servlet" % "3.0.0.v201112011016" % "container;provided;test" artifacts (Artifact("javax.servlet", "jar", "jar")),
         "org.codehaus.jackson" % "jackson-jaxrs" % "1.9.13",
         "org.scalaforge"      % "scalax"          % "0.1",
-        "com.wordnik" % "swagger-jaxrs_2.9.1" % "1.2.1",
+        "com.wordnik" % "swagger-jaxrs_2.9.1" % "1.3.0",
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2",
         "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2"
       ),

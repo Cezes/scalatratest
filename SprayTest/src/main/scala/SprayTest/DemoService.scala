@@ -19,8 +19,9 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
   with MethodOverride{
 
   protected implicit val jsonFormats: Formats = DefaultFormats
-  override protected val applicationName = Some("file process")
-  protected val applicationDescription: String = "File Processing Api"
+  override protected val applicationName: Option[String] = Some("file")
+  protected val applicationDescription: String = "File Processing Api. It allows to use file to store data about client, process and browse this data "
+
 
   before() {
     contentType = formats("json")
@@ -28,25 +29,37 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
   }
 
 
+  val showIndex =
+    (apiOperation[String]("showIndex")
+      .summary("Show available pages")
+      .notes("Show all possibilities that user can use"))
 
-   get("/index") {
+
+   get("/index", operation(showIndex)) {
      contentType="text/html"
      <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
        <body>
          <h1>Say hello to <i>spray-routing</i> on <i>spray-can</i>!</h1>
          <p>Defined resources:</p>
          <ul>
-           <li><a href="/plik">/plik</a></li>
-           <li><a href="/stats">/stats</a></li>
-           <li><a href="/timeout">/timeout</a></li>
-           <li><a href="/crash">/crash</a></li>
-           <li><a href="/fail">/fail</a></li>
-           <li><a href="/stop?method=post">/stop</a></li>
+           <li><a href="/file/plik">/plik</a></li>
+           <li><a href="/file/stats">/stats</a></li>
+           <li><a href="/file/timeout">/timeout</a></li>
+           <li><a href="/file/crash">/crash</a></li>
+           <li><a href="/file/fail">/fail</a></li>
+           <li><a href="/file/stop?method=post">/stop</a></li>
          </ul>
        </body>
      </html>
     }
-   get("/plik") {
+
+  val showFileOperations =
+    (apiOperation[String]("showFileOperations")
+      summary "Show possible actions which can be used on file"
+      notes   "Displays page with links leading to diffrent forms which grant various results, such as" +
+      "displaying file, adding entries, finding entry, removing records and obviously adding one")
+
+   get("/plik", operation(showFileOperations)) {
      contentType="text/html"
      <html >
 
@@ -54,30 +67,41 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
          <h1>Say hello to <i>spray-can</i>!</h1>
          <p>Defined operations:</p>
          <ul>
-           <li><a href="/plik/open">/Display file</a></li>
-           <li><a href="/plik/addingName">/Add record</a></li>
-           <li><a href="/plik/findBy">/Find by</a></li>
-           <li><a href="/plik/edit">/Edit record</a></li>
-           <li><a href="/plik/removeName">/Remove record</a></li>
+           <li><a href="/file/plik/open">/Display file</a></li>
+           <li><a href="/file/plik/addingName">/Add record</a></li>
+           <li><a href="/file/plik/findBy">/Find by</a></li>
+           <li><a href="/file/plik/edit">/Edit record</a></li>
+           <li><a href="/file/plik/removeName">/Remove record</a></li>
          </ul>
        </body>
      </html>
     }
-    get("/plik/open") {
+
+  val showFileContents =
+    (apiOperation[String]("showFileContents")
+      summary "Shows json contents"
+      notes   "Displays whole json content in form of String")
+
+    get("/plik/open", operation(showFileContents)) {
       val source = scala.io.Source.fromFile("file.txt")
       var lines = source.mkString
       source.close()
      lines
     }
-    get("/plik/addingName") {
+
+  val showAddingEntryForm =
+    (apiOperation[String]("showAddingEntryForm")
+      summary "Show form for adding entries"
+      notes   "Shows form which asks for Name, Age, Sex and Address of client")
+    get("/plik/addingName", operation(showAddingEntryForm)) {
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
         <head>
-          <link rel="stylesheet" type="text/css" href="/mystyle.css" ></link>
+          <link rel="stylesheet" type="text/css" href="/file/mystyle.css" ></link>
         </head>
         <body>
           <h1>Add to file</h1>
-          <form name="input" action="/plik/append" method="post">
+          <form name="input" action="/file/plik/append" method="post">
             <div id ="formWrapper">
               <label for="firstname">First name</label>
               <input type ="text" placeholder="First name" name="firstname"></input>
@@ -104,15 +128,19 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
         </body>
       </html>
     }
+  val showRemovingEntryForm =
+    (apiOperation[String]("showRemovingEntryForm")
+      summary "Show form for deleting entries"
+      notes   "Shows form which asks for Username")
     get("/plik/removeName"){
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
         <head>
-          <link type="text/css" href="\mystyle.css" rel="stylesheet"></link>
+          <link type="text/css" href="/file/mystyle.css" rel="stylesheet"></link>
         </head>
         <body>
           <h1>Remove from file</h1>
-          <form name="input" action="/plik/remove/" method="delete" >
+          <form name="input" action="/file/plik/remove" method="delete" >
             <div id ="formWrapper">
 
               <label for="user"> Username: </label>
@@ -125,15 +153,19 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
         </body>
       </html>
     }
-    get("/plik/findBy"){
+  val showFindingEntryForm =
+    (apiOperation[String]("showFindingEntryForm")
+      summary "Shows form for finding entries"
+      notes   "Shows form which asks for Name, Age, Sex and Address of client")
+    get("/plik/findBy", operation(showFindingEntryForm)){
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
         <head>
-          <link type="text/css" href="\mystyle.css" rel="stylesheet" ></link>
+          <link type="text/css" href="/file/mystyle.css" rel="stylesheet" ></link>
         </head>
         <body>
           <h1>Find by </h1>
-          <form name="input" action="/plik/find" method="get">
+          <form name="input" action="/file/plik/find" method="get">
             <div id ="formWrapper">
 
               <label for="name">Name:</label>
@@ -159,15 +191,19 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
         </body>
       </html>
     }
+  val showEditingEntryForm =
+    (apiOperation[String]("showEditingEntryForm")
+      summary "Shows form for editing entries"
+      notes   "Shows form which asks for Name, Age, Sex and Address of client")
     get("/plik/edit"){
       contentType="text/html"
       <html xmlns="http://www.w3.org/1999/xhtml" lang="pl" xml:lang="pl" >
         <head>
-          <link type ="text/css" href="\mystyle2.css" rel="stylesheet"></link>
+          <link type ="text/css" href="/file/mystyle2.css" rel="stylesheet"></link>
         </head>
         <body>
           <h1>Find record you want to edit </h1>
-          <form name="input" action="/plik/edite" method="post">
+          <form name="input" action="/file/plik/edite" method="post">
             <div id="formWrapper">
 
               <label for="name">Name:</label>
@@ -205,7 +241,16 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
         </body>
       </html>
     }
-  post("/plik/append"){
+  val appendEntry =
+    (apiOperation[Person]("appendEntry")
+      summary "Append entry based on form input"
+      parameters(
+      pathParam[String]("firstname").description("Name of customer"),
+      pathParam[String]("age").description("Age of customer"),
+      pathParam[String]("sex").description("Sex of customer"),
+      pathParam[String]("address").description("Address of customer")
+      ))
+  post("/plik/append", operation(appendEntry)){
     var name =params.get("firstname").get
     var age =params.get("age").get
     var sex = params.get("sex").get
@@ -241,7 +286,16 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
       }
     }
   }
-  get("/plik/find"){
+  val findEntry =
+    (apiOperation[Person]("findEntry")
+      summary "Find entry based on form input"
+      parameters(
+      pathParam[String]("name").description("Name of customer"),
+      pathParam[String]("age").description("Age of customer"),
+      pathParam[String]("sex").description("Sex of customer"),
+      pathParam[String]("address").description("Address of customer")
+      ))
+  get("/plik/find", operation(findEntry)){
     var name = params.get("name").get
     var age = params.get("age").get
     var sex = params.get("sex").get
@@ -266,7 +320,15 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
     }
     result
   }
-  get("/plik/remove"){
+
+  val removeEntry =
+    (apiOperation[Person]("removeEntry")
+      summary "REmove entry based on form input"
+      parameters(
+      pathParam[String]("user").description("Name of customer")
+      ))
+
+  get("/plik/remove", operation(removeEntry)){
     val nameToRemove = params.get("user").get
     val file: Seekable =  Resource.fromFile(new File("file.txt"))
     var position = 0
@@ -285,7 +347,20 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
     source.close()
     lines.toString
   }
-  post("/plik/edite"){
+  val editEntry =
+    (apiOperation[String]("editEntry")
+      summary "Finds and edits entry based on form input"
+      parameters(
+      pathParam[String]("name").description("Name of customer"),
+      pathParam[String]("newName").description("NEW name of customer"),
+      pathParam[String]("age").description("Age of customer"),
+      pathParam[String]("newAge").description("New age of customer"),
+      pathParam[String]("sex").description("Sex of customer"),
+      pathParam[String]("newSex").description("NEW Sex of customer"),
+      pathParam[String]("address").description("Address of customer"),
+      pathParam[String]("newAddress").description("New Address of customer")
+      ))
+  post("/plik/edite", operation(editEntry)){
 
     var name = params.get("name").get
     var newName = params.get("newName").get
@@ -378,13 +453,25 @@ class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
       NotAcceptable("New name must be unique")
     }
   }
-  get("/mystyle.css"){
+
+  val getStyle =
+    (apiOperation[String]("getStyle")
+      summary "Shows content of CSS file"
+      notes   "Lets end user for quick check of css file")
+
+  get("/mystyle.css", operation(getStyle)){
     val source = scala.io.Source.fromFile("mystyle.css")
     val lines = source.mkString
     source.close
     lines
   }
-  get("/mystyle2.css"){
+
+  val getStyle2 =
+    (apiOperation[String]("getStyle2")
+      summary "Shows content of CSS file"
+      notes   "Lets end user for quick check of css file")
+
+  get("/mystyle2.css", operation(getStyle2)){
     val source = scala.io.Source.fromFile("mystyle2.css")
     val lines = source.mkString
     source.close
