@@ -1,6 +1,7 @@
-{"name":"Marek","age":23,"sex":"Male","address":"Krakow"}
-{"name":"Daniel","age":24,"sex":"Male","address":"Jakistam2"}
-{"name":"Tomasz","age":24,"sex":"Male","address":"Jakistam2"}
-{"name":"Ala","age":24,"sex":"Female","address":"Jakistam2"}
-{"name":"Kota","age":24,"sex":"Female","address":"Jakistam2"}
-{"name":"Mateusz","age":19,"sex":"Female","address":"A+nie+wiem"}
+{"name":"mateusz","age":32,"sex":"male","address":"Jakistam"}
+{"name":"marek","age":21,"sex":"male","address":"Jakistam1"}
+{"name":"tomasz","age":22,"sex":"male","address":"Jakistam2"}
+{"name":"daniel","age":44,"sex":"male","address":"Jakistam3"}
+{"name":"ala","age":44,"sex":"female","address":"Jakistam4"}
+{"name":"makota","age":33,"sex":"female","address":"Jakistam4"}
+{"name":"kota","age":2,"sex":"female","address":"Jakistam4"}
