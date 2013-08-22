@@ -1,6 +1,7 @@
 
 import java.io.File
 import org.codehaus.jackson.map.ObjectMapper
+import org.json4s.JsonAST.{JObject, JNothing}
 import scala.concurrent.duration._
 import scala.Some
 
@@ -11,17 +12,19 @@ import org.scalatra.swagger._
 import org.json4s.{DefaultFormats, Formats}
 import org.scalatra.json._
 import scala.util.parsing.json.JSONObject
+import scalax.file.Path
 import scalax.io._
 
 /**
  * Class responsible for handling HTTP requests for our REST application
  * @param swagger
  */
+case class Hydrualik(test: String)
 class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
 with SwaggerSupport
 with ScalateSupport
-with NativeJsonSupport
-with MethodOverride{
+with MethodOverride
+with JacksonJsonSupport{
 
   protected implicit val jsonFormats: Formats = DefaultFormats
   override protected val applicationName: Option[String] = Some("file")   // pre-fix for all routes
@@ -530,13 +533,44 @@ with MethodOverride{
   // komenda CURLowa
   // curl -X PUT --data test="variable" http://localhost:8080/file/test
   put("/test") {
-    if (!params.contains("test")) halt (400, "test was missing\n")
-    params.get("test").get
+    /*  if (!params.contains("test")) halt (400, "test was missing\n")
+      params.get("test").get*/
+    println(parsedBody + " " + params.head._1.toLowerCase)
+    val person = parse(params.head._1 , true).extract[Person]
+
+    //Sprawdzenie poprawnosci wprowadzonych do formularza danych
+    if( !(person.sex.equals("male") | person.sex.equals("female")) | person.name.isEmpty  | person.address.isEmpty )
+      NotFound("Bad parameters used.")
+    else{
+      if(person.age < 0 )
+        NotAcceptable("Age must be a number equal or higher than 0")
+      else{
+        //val person: Person = Person(name.toLowerCase , personAge, gender, address)
+        //sprawdzenie czy imie jest unikalne
+        if (findIfNameIsUnique(Person(person.name,-1,"",""))){
+          var source = scala.io.Source.fromFile("file.txt")
+          var lines = source.mkString
+          source.close()
+          val file: Seekable =  Resource.fromFile("file.txt")
+          //Sprawdzenie czy nie dopisujemy juz do isteniejacych danych , jesli tak to dajemy znak mowej lini na poczatek
+          if (lines != "")
+            file.append("\n" + toJson(person))
+          else
+            file.append(toJson(person))
+          source = scala.io.Source.fromFile("file.txt")
+          lines = source.mkString
+          source.close
+          lines.toString
+        } else
+          NotAcceptable("Name must be unique")
+      }
+    }
   }
   // komenda CURLowa
   // curl -X DELETE http://localhost:8080/proba
   delete("/proba") {
-     "BRIAMBORIAKI"
+    val path : Path = Path("file.txt")
+    path.deleteIfExists()
   }
   /**
    * Adding styles to server

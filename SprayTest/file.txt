@@ -4,3 +4,5 @@
 {"name":"ala","age":44,"sex":"female","address":"Jakistam4"}
 {"name":"daniel","age":300,"sex":"female","address":"e1.1s"}
 {"name":"t","age":45,"sex":"male","address":"ghgh"}
+{"name":"sam","age":23,"sex":"male","address":"dafs"}
+{"name":"syn","age":21,"sex":"male","address":"ddAF"}
