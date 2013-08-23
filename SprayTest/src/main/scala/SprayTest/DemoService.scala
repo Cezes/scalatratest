@@ -558,7 +558,17 @@ with FutureSupport
   // curl -X POST -d "{"""name""":"""jakiesImie""","""age""":23,"""sex""":"""male""","""address""":"""jakisAddress"""}" URL
   // aby otrzymac json object
   // curl -X POST -H "Content-Type: application/json" -d "{"""name""":"""jakiesImie""","""age""":23,"""sex""":"""male""","""address""":"""jakisAddress"""}" URL
-  post("/test") {
+  val addRecordToJson =
+    (apiOperation[String]("addRecordToJson")
+      summary "Adds record to json file"
+      parameters(
+      pathParam[String]("name").description("Name of customer"),
+      pathParam[String]("age").description("Age of customer"),
+      pathParam[String]("sex").description("Sex of customer"),
+      pathParam[String]("address").description("Address of customer")
+      ))
+
+  post("/test", operation(addRecordToJson)) {
     val person = parsedBody.extract[Person] //parse(params.head._1 , true).extract[Person]
 
     //Sprawdzenie poprawnosci wprowadzonych do formularza danych
@@ -590,8 +600,14 @@ with FutureSupport
     }
   }
   //curl -X GET http://localhost:8080/file/plik/tomasz
+  val getName =
+    (apiOperation[String]("getName")
+      summary "Get entry from file and print it on screen"
+      parameters(
+      pathParam[String]("name").description("Name of customer")
+      ))
 
-  get("/plik/:name"){
+  get("/resource/:name", operation(getName)){
     println(params + " " + params.get("name"))
     val name = params.get("name").get
 
@@ -610,8 +626,15 @@ with FutureSupport
     result
 
   }
+  val increaseAge =
+    (apiOperation[String]("increaseAge")
+      summary "Increases age of selected person"
+      parameters(
+      pathParam[String]("name").description("Name of customer")
+     ))
+
   //curl -X PUT http://localhost:8080/file/plik/tomasz
-  put("/plik/:name"){
+  put("/resource/:name", operation(increaseAge)){
     //val json = params.get("json").get
     println(params + " " + params.get("name"))
     val name = params.get("name").get
@@ -656,9 +679,15 @@ with FutureSupport
     source.close()
     lines.toString
   }
+
+  val deleteFile =
+    (apiOperation[String]("deleteFile")
+      summary "Deletes json file"
+      )
+
   // komenda CURLowa
   // curl -X DELETE http://localhost:8080/proba
-  delete("/proba") {
+  delete("/proba", operation(deleteFile)) {
     val path : Path = Path("file.txt")
     path.deleteIfExists()
   }
