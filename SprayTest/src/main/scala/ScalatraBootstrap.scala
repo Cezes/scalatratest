@@ -1,6 +1,7 @@
+import akka.actor.{ActorSystem, Props}
 
-import org.scalatra.LifeCycle
 import javax.servlet.ServletContext
+import org.scalatra.LifeCycle
 
 /**
  * Class which is necessary for Scalatra to work
@@ -12,9 +13,16 @@ import javax.servlet.ServletContext
 class ScalatraBootstrap extends LifeCycle {
 
   implicit val swagger = new DemoSwagger
+  val system = ActorSystem()
+  val myActor = system.actorOf(Props[MyActor])
 
   override def init(context: ServletContext) {
-    context.mount(new DemoService, "/file/*")
+    context.mount(new DemoService(system, swagger), "/file/*")
     context.mount (new ResourcesApp, "/api-docs/*")
+    context.mount(new MyActorApp(system, myActor), "/actors/*")
+  }
+
+  override def destroy(context:ServletContext) {
+    system.shutdown()
   }
 }

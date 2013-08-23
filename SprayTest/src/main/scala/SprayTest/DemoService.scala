@@ -2,6 +2,7 @@
 import java.io.File
 import org.codehaus.jackson.map.ObjectMapper
 import org.json4s.JsonAST.{JObject, JNothing}
+
 import scala.concurrent.duration._
 import scala.Some
 
@@ -15,21 +16,43 @@ import scala.util.parsing.json.JSONObject
 import scalax.file.Path
 import scalax.io._
 
+import _root_.akka.actor.ActorSystem
+import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{Promise}
+import dispatch._
+import org.scalatra._
+import org.scalatra.FutureSupport
+
+
+
+object DispatchAkka {
+
+  def retrievePage()(implicit ctx: ExecutionContext): Future[String] = {
+    val prom = Promise[String]()
+    dispatch.Http(url("http://localhost:8080/actors/async") OK as.String) onComplete {
+      case r => prom.complete(r)
+    }
+    prom.future
+  }
+}
+
 /**
  * Class responsible for handling HTTP requests for our REST application
  * @param swagger
  */
-case class Hydrualik(test: String)
-class DemoService (implicit val swagger: Swagger) extends ScalatraServlet
+
+class DemoService (system: ActorSystem, implicit val swagger: Swagger) extends ScalatraServlet
 with SwaggerSupport
 with ScalateSupport
 with MethodOverride
-with JacksonJsonSupport{
+with JacksonJsonSupport
+with FutureSupport
+{
 
   protected implicit val jsonFormats: Formats = DefaultFormats
   override protected val applicationName: Option[String] = Some("file")   // pre-fix for all routes
   protected val applicationDescription: String = "File Processing Api. It allows to use file to store data about client, process and browse this data "
-
+  protected implicit def executor: ExecutionContext = system.dispatcher
 
   before() {
     contentType = formats("json")
@@ -531,12 +554,12 @@ with JacksonJsonSupport{
     }
   }
   // komenda CURLowa
-  // curl -X PUT --data test="variable" http://localhost:8080/file/test
-  put("/test") {
-    /*  if (!params.contains("test")) halt (400, "test was missing\n")
-      params.get("test").get*/
-    println(parsedBody + " " + params.head._1.toLowerCase)
-    val person = parse(params.head._1 , true).extract[Person]
+  // curl -X POST --data test="variable" http://localhost:8080/file/test
+  // curl -X POST -d "{"""name""":"""jakiesImie""","""age""":23,"""sex""":"""male""","""address""":"""jakisAddress"""}" URL
+  // aby otrzymac json object
+  // curl -X POST -H "Content-Type: application/json" -d "{"""name""":"""jakiesImie""","""age""":23,"""sex""":"""male""","""address""":"""jakisAddress"""}" URL
+  post("/test") {
+    val person = parsedBody.extract[Person] //parse(params.head._1 , true).extract[Person]
 
     //Sprawdzenie poprawnosci wprowadzonych do formularza danych
     if( !(person.sex.equals("male") | person.sex.equals("female")) | person.name.isEmpty  | person.address.isEmpty )
@@ -566,6 +589,73 @@ with JacksonJsonSupport{
       }
     }
   }
+  //curl -X GET http://localhost:8080/file/plik/tomasz
+
+  get("/plik/:name"){
+    println(params + " " + params.get("name"))
+    val name = params.get("name").get
+
+    var person = Person(name,-1,"","")
+    println(name + " x " + person)
+    var result = ""
+    try{
+      var source = scala.io.Source.fromFile("file.txt")
+      for ( line <- source.getLines()){
+        var currentLineResult = findMatch( line, person)
+        result = result + currentLineResult
+        currentLineResult =""
+      }
+      source.close()
+    }
+    result
+
+  }
+  //curl -X PUT http://localhost:8080/file/plik/tomasz
+  put("/plik/:name"){
+    //val json = params.get("json").get
+    println(params + " " + params.get("name"))
+    val name = params.get("name").get
+
+    var personToEdit = Person(name,-1,"","")
+
+    var temporary = 0
+    val file: Seekable =  Resource.fromFile("file.txt")
+    var position = 0
+
+    try{
+      val fileLenght = file.lines().mkString.length
+      var offset = 0
+      for( line <- file.lines()){
+        var currentLineResult = ""
+        println(line)
+        if ( position + line.length <= fileLenght){
+          currentLineResult = findMatch( line, personToEdit)}
+        else{
+          //offset wprowadzony aby pozbyc sie buga w ktorym jesli nowa linijka była krotsza to w ostatniej linijsce pliku bylo przesuniecie
+          val linesubstring = line.substring(0, (line.length - offset))
+          if ( linesubstring.isEmpty == false)
+            currentLineResult = findMatch ( line.substring(0, (line.length-offset)), personToEdit )}
+        if ( currentLineResult.isEmpty){
+          position = position + line.length + 2
+        }
+        else {
+          val currPerson = parse(line , true).extract[Person]
+          val newPerson = Person(name, currPerson.age+1, currPerson.sex, currPerson.address)
+          val newLine =  editPerson(line , newPerson)
+          if ( newLine.length > line.length)
+            offset = offset + (newLine.length - line.length)
+          file.patch(position  , newLine , OverwriteSome(line.length))
+          file.string
+          println("offset:" + offset)
+          position = position + newLine.length + 2
+        }
+      }
+    }
+    val source = scala.io.Source.fromFile("file.txt")
+    val lines = source.mkString
+    source.close()
+    lines.toString
+  }
   // komenda CURLowa
   // curl -X DELETE http://localhost:8080/proba
   delete("/proba") {
@@ -588,6 +678,13 @@ with JacksonJsonSupport{
     source.close
     lines
   }
+
+  get("/") {
+    new AsyncResult { val is =
+      DispatchAkka.retrievePage()
+    }
+  }
+
   notFound {
     // remove content type in case it was set through an action
     contentType = null

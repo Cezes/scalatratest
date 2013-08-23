@@ -21,6 +21,7 @@ object FlowershopBuild extends Build {
       version := Version,
       scalaVersion := ScalaVersion,
       resolvers += "Sonatype OSS Snapshots" at "http://oss.sonatype.org/content/repositories/snapshots/",
+      resolvers += "Akka Repo" at "http://repo.akka.io/repository",
       libraryDependencies ++= Seq(
         "org.json4s"   %% "json4s-native" % "3.2.4",
         "org.json4s"   %% "json4s-jackson" % "3.2.4",
@@ -37,7 +38,8 @@ object FlowershopBuild extends Build {
         "org.scalaforge"      % "scalax"          % "0.1",
         "com.wordnik" % "swagger-jaxrs_2.9.1" % "1.3.0",
         "com.github.scala-incubator.io" %% "scala-io-core" % "0.4.2",
-        "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2"
+        "com.github.scala-incubator.io" %% "scala-io-file" % "0.4.2",
+        "net.databinder.dispatch" % "dispatch-core_2.10" % "0.11.0"
       ),
       scalateTemplateConfig in Compile <<= (sourceDirectory in Compile){ base =>
         Seq(
