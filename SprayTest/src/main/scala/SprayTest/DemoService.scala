@@ -76,11 +76,6 @@ with FutureSupport
         <p>Defined resources:</p>
         <ul>
           <li><a href="/file/plik">/plik</a></li>
-     <!--     <li><a href="/file/stats">/stats</a></li>
-          <li><a href="/file/timeout">/timeout</a></li>
-          <li><a href="/file/crash">/crash</a></li>
-          <li><a href="/file/fail">/fail</a></li>
-          <li><a href="/file/stop?method=post">/stop</a></li>     -->
         </ul>
       </body>
     </html>
